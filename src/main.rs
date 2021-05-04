@@ -1,0 +1,108 @@
+use std::{collections::HashMap, net::SocketAddr, sync::Arc};
+
+use env_logger::Env;
+use prometheus::{Encoder, Registry, TextEncoder};
+use tokio::sync::Mutex;
+use warp::{
+    http,
+    hyper::{self, header::CONTENT_TYPE},
+    Filter,
+};
+
+use error::Error;
+use metrics::Metrics;
+use starlink::proto::space_x::api::device::{device_client::DeviceClient, GetStatusRequest, Request};
+
+mod error;
+mod metrics;
+
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let env = Env::default().filter_or("RUST_LOG", "starlink_exporter=info");
+    env_logger::init_from_env(env);
+
+    let bind_address = dotenv::var("BIND_ADDRESS")
+        .unwrap_or("0.0.0.0:9184".to_string())
+        .parse::<SocketAddr>()
+        .expect("parsing BIND_ADDRESS");
+    let starlink_address = dotenv::var("STARLINK_ADDRESS").unwrap_or("http://192.168.100.1:9200".to_string());
+
+    log::info!("connecting ro Starlink device on {}", &starlink_address);
+
+    let mut client = DeviceClient::connect(starlink_address.clone()).await?;
+
+    let get_status_req = tonic::Request::new(Request {
+        get_status: Some(GetStatusRequest {}),
+        ..Default::default()
+    });
+    let get_status_res = client.handle(get_status_req).await?.into_inner();
+
+    let mut labels = HashMap::new();
+
+    if let Some(dish_get_status) = get_status_res.dish_get_status {
+        if let Some(device_info) = dish_get_status.device_info {
+            if let Some(id) = device_info.id {
+                log::info!("setting registry label id = {}", &id);
+                labels.insert("id".to_string(), id);
+            }
+            if let Some(hardware_version) = device_info.hardware_version {
+                log::info!("setting registry label hardware_version = {}", &hardware_version);
+                labels.insert("hardware_version".to_string(), hardware_version);
+            }
+            if let Some(software_version) = device_info.software_version {
+                log::info!("setting registry label software_version = {}", &software_version);
+                labels.insert("software_version".to_string(), software_version);
+            }
+            if let Some(country_code) = device_info.country_code {
+                log::info!("setting registry label country_code = {}", &country_code);
+                labels.insert("country_code".to_string(), country_code);
+            }
+        }
+    }
+
+    let registry = Registry::new_custom(Some("starlink".to_string()), Some(labels))?;
+
+    let metrics = Metrics::new()?;
+    metrics.register(&registry)?;
+    let metrics = Arc::new(Mutex::new(metrics));
+
+    let route = warp::get()
+        .and(warp::path("metrics"))
+        .and(warp::addr::remote())
+        .and_then(move |addr: Option<SocketAddr>| {
+            if let Some(addr) = addr {
+                log::info!("incoming request from {}", addr);
+            }
+
+            let starlink_address = starlink_address.clone();
+            let metrics = metrics.clone();
+            let registry = registry.clone();
+
+            async move {
+                let mut metrics = metrics.lock().await;
+                metrics.update(starlink_address).await?;
+
+                let encoder = TextEncoder::new();
+
+                let metric_families = registry.gather();
+                let mut buffer = vec![];
+                encoder
+                    .encode(&metric_families, &mut buffer)
+                    .map_err(|e| Error::from(e))?;
+
+                let response = http::Response::builder()
+                    .status(200)
+                    .header(CONTENT_TYPE, encoder.format_type())
+                    .body(hyper::Body::from(buffer))
+                    .map_err(|e| Error::from(e))?;
+
+                Ok(response) as Result<hyper::Response<hyper::Body>, warp::Rejection>
+            }
+        });
+
+    log::info!("binding Prometheus exporter on http://{}", &bind_address);
+
+    warp::serve(route).run(bind_address).await;
+
+    Ok(())
+}
