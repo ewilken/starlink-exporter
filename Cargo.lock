@@ -114,10 +114,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "cpuid-bool"
-version = "0.1.2"
+name = "cpufeatures"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8aebca1129a03dc6dc2b127edd729435bbc4a37e1d5f4d7513165089ceb02634"
+checksum = "dec1028182c380cc45a2e2c5ec841134f2dfd0f8f5f0a5bcd68004f81b5efdf4"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "digest"
@@ -450,6 +453,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37d572918e350e82412fe766d24b15e6682fb2ed2bbe018280caa810397cb319"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -694,22 +706,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e6984d2f1a23009bd270b8bb56d0926810a3d483f59c987d77969e9d8e840b2"
 dependencies = [
  "bytes",
- "prost-derive",
+ "prost-derive 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "prost"
+version = "0.7.0"
+source = "git+https://github.com/danburkert/prost.git?rev=28e4522#28e4522f8ae738d4574cce104da6fd88d9ce0c14"
+dependencies = [
+ "bytes",
+ "prost-derive 0.7.0 (git+https://github.com/danburkert/prost.git?rev=28e4522)",
 ]
 
 [[package]]
 name = "prost-build"
 version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32d3ebd75ac2679c2af3a92246639f9fcc8a442ee420719cc4fe195b98dd5fa3"
+source = "git+https://github.com/danburkert/prost.git?rev=28e4522#28e4522f8ae738d4574cce104da6fd88d9ce0c14"
 dependencies = [
  "bytes",
  "heck",
- "itertools",
+ "itertools 0.10.0",
  "log",
  "multimap",
  "petgraph",
- "prost",
+ "prost 0.7.0 (git+https://github.com/danburkert/prost.git?rev=28e4522)",
  "prost-types",
  "tempfile",
  "which",
@@ -722,7 +742,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "169a15f3008ecb5160cba7d37bcd690a7601b6d30cfb87a117d45e59d52af5d4"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.9.0",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "prost-derive"
+version = "0.7.0"
+source = "git+https://github.com/danburkert/prost.git?rev=28e4522#28e4522f8ae738d4574cce104da6fd88d9ce0c14"
+dependencies = [
+ "anyhow",
+ "itertools 0.10.0",
  "proc-macro2",
  "quote",
  "syn",
@@ -731,11 +763,10 @@ dependencies = [
 [[package]]
 name = "prost-types"
 version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b518d7cdd93dab1d1122cf07fa9a60771836c668dde9d9e2a139f957f0d9f1bb"
+source = "git+https://github.com/danburkert/prost.git?rev=28e4522#28e4522f8ae738d4574cce104da6fd88d9ce0c14"
 dependencies = [
  "bytes",
- "prost",
+ "prost 0.7.0 (git+https://github.com/danburkert/prost.git?rev=28e4522)",
 ]
 
 [[package]]
@@ -851,9 +882,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.3"
+version = "1.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce5f1ceb7f74abbce32601642fcf8e8508a8a8991e0621c7d750295b9095702b"
+checksum = "d07a8629359eb56f1e2fb1652bb04212c072a87ba68546a04065d525673ac461"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -930,13 +961,13 @@ dependencies = [
 
 [[package]]
 name = "sha-1"
-version = "0.9.4"
+version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfebf75d25bd900fd1e7d11501efab59bc846dbc76196839663e6637bba9f25f"
+checksum = "b659df5fc3ce22274daac600ffb845300bd2125bcfaec047823075afdab81c00"
 dependencies = [
  "block-buffer",
  "cfg-if",
- "cpuid-bool",
+ "cpufeatures",
  "digest",
  "opaque-debug",
 ]
@@ -965,18 +996,17 @@ dependencies = [
 
 [[package]]
 name = "starlink"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8aacd93855008c23b59c731a57aafcd271e9ce6afe9ab066b199b36b83c5546c"
+version = "0.2.0"
+source = "git+https://github.com/ewilken/starlink-rs.git?branch=main#dc84c3b2eca0ea614ceedef32057de4fa2ef27a6"
 dependencies = [
- "prost",
+ "prost 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tonic",
  "tonic-build",
 ]
 
 [[package]]
 name = "starlink-exporter"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dotenv",
  "env_logger",
@@ -1151,8 +1181,8 @@ dependencies = [
  "hyper",
  "percent-encoding",
  "pin-project",
- "prost",
- "prost-derive",
+ "prost 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "prost-derive 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio",
  "tokio-stream",
  "tokio-util",
@@ -1165,8 +1195,7 @@ dependencies = [
 [[package]]
 name = "tonic-build"
 version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c695de27302f4697191dda1c7178131a8cb805463dda02864acb80fe1322fdcf"
+source = "git+https://github.com/ewilken/tonic.git#53f885426fe4d9197d5c5d05f6247dad3ab54341"
 dependencies = [
  "proc-macro2",
  "prost-build",
@@ -1330,9 +1359,9 @@ checksum = "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
 
 [[package]]
 name = "url"
-version = "2.2.1"
+version = "2.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ccd964113622c8e9322cfac19eb1004a07e636c545f325da085d5cdde6f1f8b"
+checksum = "a507c383b2d33b5fc35d1861e77e6b383d158b2da5e14fe51b83dfedf6fd578c"
 dependencies = [
  "form_urlencoded",
  "idna",

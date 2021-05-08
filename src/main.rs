@@ -11,7 +11,13 @@ use warp::{
 
 use error::Error;
 use metrics::Metrics;
-use starlink::proto::space_x::api::device::{device_client::DeviceClient, GetStatusRequest, Request};
+use starlink::proto::space_x::api::device::{
+    device_client::DeviceClient,
+    request,
+    response,
+    GetDeviceInfoRequest,
+    Request,
+};
 
 mod error;
 mod metrics;
@@ -31,16 +37,16 @@ async fn main() -> Result<(), Error> {
 
     let mut client = DeviceClient::connect(starlink_address.clone()).await?;
 
-    let get_status_req = tonic::Request::new(Request {
-        get_status: Some(GetStatusRequest {}),
+    let req = tonic::Request::new(Request {
+        request: Some(request::Request::GetDeviceInfo(GetDeviceInfoRequest {})),
         ..Default::default()
     });
-    let get_status_res = client.handle(get_status_req).await?.into_inner();
+    let res = client.handle(req).await?.into_inner();
 
     let mut labels = HashMap::new();
 
-    if let Some(dish_get_status) = get_status_res.dish_get_status {
-        if let Some(device_info) = dish_get_status.device_info {
+    if let Some(response::Response::GetDeviceInfo(r)) = res.response {
+        if let Some(device_info) = r.device_info {
             if let Some(id) = device_info.id {
                 log::info!("setting registry label id = {}", &id);
                 labels.insert("id".to_string(), id);
