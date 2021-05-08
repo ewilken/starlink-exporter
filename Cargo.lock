@@ -1006,7 +1006,7 @@ dependencies = [
 
 [[package]]
 name = "starlink-exporter"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "dotenv",
  "env_logger",

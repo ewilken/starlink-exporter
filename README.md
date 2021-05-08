@@ -7,12 +7,20 @@ Prometheus exporter for the metrics exposed by the gRPC endpoint of the SpaceX S
 
 Based on [`starlink-rs`](https://github.com/ewilken/starlink-rs).
 
+## Labels
+
+- `id`: ID of the dish. Evaluated on program start and set to every metric.
+- `hardware_version`: Hardware version of the dish. Evaluated on program start and set to every metric.
+- `software_version`: Software version of the dish firmware. Subject to change at runtime. Re-evaluated on every scrape and set only to the `starlink_dish_device_info` metric.
+- `country_code`: Country code of the dish. Subject to change at runtime (sometimes nulled). Re-evaluated on every scrape and set only to the `starlink_dish_device_info` metric.
+
 ## Metrics
 
 Currently, the following metrics are exposed:
 
 | Name                                                      | Type     |  Description                                                                                                                |
 | --------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `starlink_dish_device_info`                               | GaugeVec | Device information. Exposing `software_version` and `country_code` as additional labels.                                    |
 | `starlink_dish_uptime_s`                                  | Counter  | Dish uptime in seconds.                                                                                                     |
 | `starlink_dish_state`                                     | Gauge    | Dish state. 0: Unknown, 1: Connected, 2: Searching, 3: Booting.                                                             |
 | `starlink_dish_alert_motors_stuck`                        | Gauge    | Alert: Motors stuck.                                                                                                        |
@@ -29,8 +37,8 @@ Currently, the following metrics are exposed:
 | `starlink_dish_pop_ping_latency_ms`                       | Gauge    | Pop ping latency in ms.                                                                                                     |
 | `starlink_dish_obstruction_currently_obstructed`          | Gauge    | Obstruction: Currently obstructed.                                                                                          |
 | `starlink_dish_obstruction_fraction_obstructed`           | Gauge    | Obstruction: Obstructed fraction. Sum of obstructed fractions.                                                              |
-| `starlink_dish_obstruction_last_24h_obstructed_s`         | Gauge    | Obstruction: Obstructed seconds in the last 24 hours.                                                                       |
-| `starlink_dish_obstruction_valid_s`                       | Gauge    | Obstruction: Valid seconds.                                                                                                 |
+| `starlink_dish_obstruction_last_24h_obstructed_s`         | Counter  | Obstruction: Obstructed seconds in the last 24 hours.                                                                       |
+| `starlink_dish_obstruction_valid_s`                       | Counter  | Obstruction: Valid seconds.                                                                                                 |
 | `starlink_dish_obstruction_wedge_fraction_obstructed`     | GaugeVec | Obstruction: Wedge fraction obstructed. Measure of obstruction in twelve 30 degree wedges around the dish.                  |
 | `starlink_dish_obstruction_wedge_abs_fraction_obstructed` | GaugeVec | Obstruction: Wedge fraction obstruction average. Measure of average obstruction in twelve 30 degree wedges around the dish. |
 | `starlink_dish_cell_id`                                   | Gauge    | Cell ID.                                                                                                                    |

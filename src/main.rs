@@ -55,14 +55,15 @@ async fn main() -> Result<(), Error> {
                 log::info!("setting registry label hardware_version = {}", &hardware_version);
                 labels.insert("hardware_version".to_string(), hardware_version);
             }
-            if let Some(software_version) = device_info.software_version {
-                log::info!("setting registry label software_version = {}", &software_version);
-                labels.insert("software_version".to_string(), software_version);
-            }
-            if let Some(country_code) = device_info.country_code {
-                log::info!("setting registry label country_code = {}", &country_code);
-                labels.insert("country_code".to_string(), country_code);
-            }
+            // `software_version` & `country_code` are subject to change at runtime
+            // if let Some(software_version) = device_info.software_version {
+            //     log::info!("setting registry label software_version = {}", &software_version);
+            //     labels.insert("software_version".to_string(), software_version);
+            // }
+            // if let Some(country_code) = device_info.country_code {
+            //     log::info!("setting registry label country_code = {}", &country_code);
+            //     labels.insert("country_code".to_string(), country_code);
+            // }
         }
     }
 

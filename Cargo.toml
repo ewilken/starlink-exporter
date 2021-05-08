@@ -1,6 +1,6 @@
 [package]
 name = "starlink-exporter"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Elias Wilken <elias@wlkn.io>"]
 edition = "2018"
 description = "Prometheus exporter for the metrics exposed by the gRPC endpoint of the SpaceX Starlink user terminal"
