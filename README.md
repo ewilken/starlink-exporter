@@ -117,6 +117,12 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
 ```
 
+## Grafana
+
+An example Grafana dashboard is included in the [dashboard](dashboard) directory.
+
+![Example Dashboard](dashboard/preview.png)
+
 ## CI & Versioning
 
 [Images hosted on GHCR](https://github.com/users/ewilken/packages/container/package/starlink-exporter) are built in CI from main tagged `latest` and with the short commit hash returned by `$(git log -1 --format=%h)`, e.g. `1354d30`.
