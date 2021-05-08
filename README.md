@@ -11,23 +11,31 @@ Based on [`starlink-rs`](https://github.com/ewilken/starlink-rs).
 
 Currently, the following metrics are exposed:
 
-- `starlink_dish_alerts_motors_stuck`
-- `starlink_dish_alerts_thermal_shutdown`
-- `starlink_dish_alerts_thermal_throttle`
-- `starlink_dish_downlink_throughput_bps`
-- `starlink_dish_obstruction_stats_currently_obstructed`
-- `starlink_dish_obstruction_stats_fraction_obstructed`
-- `starlink_dish_obstruction_stats_last_24h_obstructed_s`
-- `starlink_dish_obstruction_stats_valid_s`
-- `starlink_dish_obstruction_stats_wedge_abs_fraction_obstructed`
-- `starlink_dish_obstruction_stats_wedge_fraction_obstructed`
-- `starlink_dish_pop_ping_drop_rate`
-- `starlink_dish_pop_ping_latency_ms`
-- `starlink_dish_seconds_to_first_nonempty_slot`
-- `starlink_dish_snr`
-- `starlink_dish_state`
-- `starlink_dish_uplink_throughput_bps`
-- `starlink_dish_uptime_s`
+| Name                                                      | Type     |  Description                                                                                                                |
+| --------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `starlink_dish_uptime_s`                                  | Counter  | Dish uptime in seconds.                                                                                                     |
+| `starlink_dish_state`                                     | Gauge    | Dish state. 0: Unknown, 1: Connected, 2: Searching, 3: Booting.                                                             |
+| `starlink_dish_alert_motors_stuck`                        | Gauge    | Alert: Motors stuck.                                                                                                        |
+| `starlink_dish_alert_thermal_throttle`                    | Gauge    | Alert: Thermal throttle.                                                                                                    |
+| `starlink_dish_alert_thermal_shutdown`                    | Gauge    | Alert: Thermal shutdown.                                                                                                    |
+| `starlink_dish_alert_mast_not_near_vertical`              | Gauge    | Alert: Mast not near vertical.                                                                                              |
+| `starlink_dish_alert_unexpected_location`                 | Gauge    | Alert: Unexpected location.                                                                                                 |
+| `starlink_dish_alert_slow_ethernet_speeds`                | Gauge    | Alert: Slow ethernet speeds.                                                                                                |
+| `starlink_dish_snr`                                       | Gauge    | Signal-to-noise ratio.                                                                                                      |
+| `starlink_dish_seconds_to_first_nonempty_slot`            | Gauge    | Seconds to first non-empty slot.                                                                                            |
+| `starlink_dish_pop_ping_drop_rate`                        | Gauge    | Pop ping drop rate.                                                                                                         |
+| `starlink_dish_downlink_throughput_bps`                   | Gauge    | Downlink throughput in Bps.                                                                                                 |
+| `starlink_dish_uplink_throughput_bps`                     | Gauge    | Uplink throughput in Bps.                                                                                                   |
+| `starlink_dish_pop_ping_latency_ms`                       | Gauge    | Pop ping latency in ms.                                                                                                     |
+| `starlink_dish_obstruction_currently_obstructed`          | Gauge    | Obstruction: Currently obstructed.                                                                                          |
+| `starlink_dish_obstruction_fraction_obstructed`           | Gauge    | Obstruction: Obstructed fraction. Sum of obstructed fractions.                                                              |
+| `starlink_dish_obstruction_last_24h_obstructed_s`         | Gauge    | Obstruction: Obstructed seconds in the last 24 hours.                                                                       |
+| `starlink_dish_obstruction_valid_s`                       | Gauge    | Obstruction: Valid seconds.                                                                                                 |
+| `starlink_dish_obstruction_wedge_fraction_obstructed`     | GaugeVec | Obstruction: Wedge fraction obstructed. Measure of obstruction in twelve 30 degree wedges around the dish.                  |
+| `starlink_dish_obstruction_wedge_abs_fraction_obstructed` | GaugeVec | Obstruction: Wedge fraction obstruction average. Measure of average obstruction in twelve 30 degree wedges around the dish. |
+| `starlink_dish_cell_id`                                   | Gauge    | Cell ID.                                                                                                                    |
+| `starlink_dish_pop_rack_id`                               | Gauge    | Pop rack ID.                                                                                                                |
+| `starlink_dish_seconds_to_slot_end`                       | Gauge    | Seconds to slot end.                                                                                                        |
 
 ## Usage
 
