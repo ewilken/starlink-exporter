@@ -1,6 +1,6 @@
 [package]
 name = "starlink-exporter"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Elias Wilken <elias@wlkn.io>"]
 edition = "2018"
 description = "Prometheus exporter for the metrics exposed by the gRPC endpoint of the SpaceX Starlink user terminal"
@@ -11,12 +11,11 @@ keywords = ["spacex", "starlink", "prometheus"]
 
 [dependencies]
 dotenv = "0.15"
-env_logger = "0.8"
+env_logger = "0.9"
 log = "0.4"
 prometheus = "0.12"
-# starlink = "0.1"
-starlink = { git = "https://github.com/ewilken/starlink-rs.git", branch = "main" }
+starlink = "0.2"
 thiserror = "1.0"
 tokio = { version = "1.5", features = ["rt-multi-thread"] }
-tonic = "0.4"
+tonic = "0.5"
 warp = "0.3"
