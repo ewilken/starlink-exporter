@@ -7,7 +7,6 @@ use starlink::proto::space_x::api::device::{
     device_client::DeviceClient,
     request,
     response,
-    DishGetContextRequest,
     GetStatusRequest,
     Request,
 };
@@ -40,10 +39,6 @@ pub struct Metrics {
     pub obstruction_valid_s: Counter,
     pub obstruction_wedge_fraction_obstructed: GaugeVec,
     pub obstruction_wedge_abs_fraction_obstructed: GaugeVec,
-
-    pub cell_id: Gauge,
-    pub pop_rack_id: Gauge,
-    pub seconds_to_slot_end: Gauge,
 }
 
 impl Metrics {
@@ -149,12 +144,6 @@ impl Metrics {
                 .subsystem("obstruction"),
                 &["wedge"],
             )?,
-
-            cell_id: Gauge::with_opts(Opts::new("cell_id", "Cell ID.").namespace("dish"))?,
-            pop_rack_id: Gauge::with_opts(Opts::new("pop_rack_id", "Pop rack ID.").namespace("dish"))?,
-            seconds_to_slot_end: Gauge::with_opts(
-                Opts::new("seconds_to_slot_end", "Seconds to slot end.").namespace("dish"),
-            )?,
         };
 
         Ok(metrics)
@@ -188,10 +177,6 @@ impl Metrics {
         registry.register(Box::new(self.obstruction_wedge_fraction_obstructed.clone()))?;
         registry.register(Box::new(self.obstruction_wedge_abs_fraction_obstructed.clone()))?;
 
-        registry.register(Box::new(self.cell_id.clone()))?;
-        registry.register(Box::new(self.pop_rack_id.clone()))?;
-        registry.register(Box::new(self.seconds_to_slot_end.clone()))?;
-
         Ok(())
     }
 
@@ -208,15 +193,6 @@ impl Metrics {
         let res = client.handle(req).await?;
         log::debug!("received gRPC response: {:#?}", &res);
         let get_status_res = res.into_inner();
-
-        log::debug!("sending DishGetContextRequest to Starlink device");
-        let req = tonic::Request::new(Request {
-            request: Some(request::Request::DishGetContext(DishGetContextRequest {})),
-            ..Default::default()
-        });
-        let res = client.handle(req).await?;
-        log::debug!("received gRPC response: {:#?}", &res);
-        let dish_get_context_res = res.into_inner();
 
         if let Some(response::Response::DishGetStatus(response)) = get_status_res.response {
             if let Some(device_info) = response.device_info {
@@ -414,24 +390,6 @@ impl Metrics {
                         .get_metric_with(&m)?
                         .set(v as f64);
                 }
-            }
-        }
-
-        if let Some(response::Response::DishGetContext(response)) = dish_get_context_res.response {
-            if let Some(cell_id) = response.cell_id {
-                log::info!("cell_id: {}", &cell_id);
-
-                self.cell_id.set(cell_id as f64);
-            }
-            if let Some(pop_rack_id) = response.pop_rack_id {
-                log::info!("pop_rack_id: {}", &pop_rack_id);
-
-                self.pop_rack_id.set(pop_rack_id as f64);
-            }
-            if let Some(seconds_to_slot_end) = response.seconds_to_slot_end {
-                log::info!("seconds_to_slot_end: {}", &seconds_to_slot_end);
-
-                self.seconds_to_slot_end.set(seconds_to_slot_end as f64);
             }
         }
 

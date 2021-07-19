@@ -41,9 +41,6 @@ Currently, the following metrics are exposed:
 | `starlink_dish_obstruction_valid_s`                       | Counter  | Obstruction: Valid seconds.                                                                                                 |
 | `starlink_dish_obstruction_wedge_fraction_obstructed`     | GaugeVec | Obstruction: Wedge fraction obstructed. Measure of obstruction in twelve 30 degree wedges around the dish.                  |
 | `starlink_dish_obstruction_wedge_abs_fraction_obstructed` | GaugeVec | Obstruction: Wedge fraction obstruction average. Measure of average obstruction in twelve 30 degree wedges around the dish. |
-| `starlink_dish_cell_id`                                   | Gauge    | Cell ID.                                                                                                                    |
-| `starlink_dish_pop_rack_id`                               | Gauge    | Pop rack ID.                                                                                                                |
-| `starlink_dish_seconds_to_slot_end`                       | Gauge    | Seconds to slot end.                                                                                                        |
 
 ## Usage
 
