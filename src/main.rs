@@ -1,16 +1,14 @@
-use std::{collections::HashMap, net::SocketAddr, sync::Arc};
-
-use env_logger::Env;
 use prometheus::{Encoder, Registry, TextEncoder};
+use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 use tokio::sync::Mutex;
+use tracing::info;
 use warp::{
     http,
     hyper::{self, header::CONTENT_TYPE},
     Filter,
 };
 
-use error::Error;
-use metrics::Metrics;
+use crate::{error::Error, metrics::Metrics};
 use starlink::proto::space_x::api::device::{
     device_client::DeviceClient,
     request,
@@ -24,8 +22,7 @@ mod metrics;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let env = Env::default().filter_or("RUST_LOG", "starlink_exporter=info");
-    env_logger::init_from_env(env);
+    tracing_subscriber::fmt::init();
 
     let bind_address = dotenv::var("BIND_ADDRESS")
         .unwrap_or("0.0.0.0:9184".to_string())
@@ -33,7 +30,7 @@ async fn main() -> Result<(), Error> {
         .expect("parsing BIND_ADDRESS");
     let starlink_address = dotenv::var("STARLINK_ADDRESS").unwrap_or("http://192.168.100.1:9200".to_string());
 
-    log::info!("connecting ro Starlink device on {}", &starlink_address);
+    info!("connecting ro Starlink device on {}", &starlink_address);
 
     let mut client = DeviceClient::connect(starlink_address.clone()).await?;
 
@@ -48,20 +45,20 @@ async fn main() -> Result<(), Error> {
     if let Some(response::Response::GetDeviceInfo(r)) = res.response {
         if let Some(device_info) = r.device_info {
             if let Some(id) = device_info.id {
-                log::info!("setting registry label id = {}", &id);
+                info!("setting registry label id = {}", &id);
                 labels.insert("id".to_string(), id);
             }
             if let Some(hardware_version) = device_info.hardware_version {
-                log::info!("setting registry label hardware_version = {}", &hardware_version);
+                info!("setting registry label hardware_version = {}", &hardware_version);
                 labels.insert("hardware_version".to_string(), hardware_version);
             }
             // `software_version` & `country_code` are subject to change at runtime
             // if let Some(software_version) = device_info.software_version {
-            //     log::info!("setting registry label software_version = {}", &software_version);
+            //     info!("setting registry label software_version = {}", &software_version);
             //     labels.insert("software_version".to_string(), software_version);
             // }
             // if let Some(country_code) = device_info.country_code {
-            //     log::info!("setting registry label country_code = {}", &country_code);
+            //     info!("setting registry label country_code = {}", &country_code);
             //     labels.insert("country_code".to_string(), country_code);
             // }
         }
@@ -78,7 +75,7 @@ async fn main() -> Result<(), Error> {
         .and(warp::addr::remote())
         .and_then(move |addr: Option<SocketAddr>| {
             if let Some(addr) = addr {
-                log::info!("incoming request from {}", addr);
+                info!("incoming request from {}", addr);
             }
 
             let starlink_address = starlink_address.clone();
@@ -107,7 +104,7 @@ async fn main() -> Result<(), Error> {
             }
         });
 
-    log::info!("binding Prometheus exporter on http://{}", &bind_address);
+    info!("binding Prometheus exporter on http://{}", &bind_address);
 
     warp::serve(route).run(bind_address).await;
 

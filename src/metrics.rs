@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-
 use prometheus::{Counter, Gauge, GaugeVec, Opts, Registry};
+use std::collections::HashMap;
+use tracing::{debug, info};
 
 use crate::error::Error;
 use starlink::proto::space_x::api::device::{
@@ -183,15 +183,15 @@ impl Metrics {
     pub async fn update(&mut self, starlink_address: String) -> Result<(), Error> {
         let mut client = DeviceClient::connect(starlink_address).await?;
 
-        log::info!("updating metrics from Starlink device");
+        info!("updating metrics from Starlink device");
 
-        log::debug!("sending GetStatusRequest to Starlink device");
+        debug!("sending GetStatusRequest to Starlink device");
         let req = tonic::Request::new(Request {
             request: Some(request::Request::GetStatus(GetStatusRequest {})),
             ..Default::default()
         });
         let res = client.handle(req).await?;
-        log::debug!("received gRPC response: {:#?}", &res);
+        debug!("received gRPC response: {:#?}", &res);
         let get_status_res = res.into_inner();
 
         if let Some(response::Response::DishGetStatus(response)) = get_status_res.response {
@@ -204,7 +204,7 @@ impl Metrics {
                 // if let Some(d_id) = device_info.id {
                 //     id = d_id;
 
-                //     log::info!("id: {}", &id);
+                //     info!("id: {}", &id);
 
                 //     labels.insert("id", id.as_str());
                 // }
@@ -213,7 +213,7 @@ impl Metrics {
                 // if let Some(d_hardware_version) = device_info.hardware_version {
                 //     hardware_version = d_hardware_version;
 
-                //     log::info!("hardware_version: {}", &hardware_version);
+                //     info!("hardware_version: {}", &hardware_version);
 
                 //     labels.insert("hardware_version", hardware_version.as_str());
                 // }
@@ -222,7 +222,7 @@ impl Metrics {
                 if let Some(d_software_version) = device_info.software_version {
                     software_version = d_software_version;
 
-                    log::info!("software_version: {}", &software_version);
+                    info!("software_version: {}", &software_version);
 
                     labels.insert("software_version", software_version.as_str());
                 }
@@ -231,7 +231,7 @@ impl Metrics {
                 if let Some(d_country_code) = device_info.country_code {
                     country_code = d_country_code;
 
-                    log::info!("country_code: {}", &country_code);
+                    info!("country_code: {}", &country_code);
 
                     labels.insert("country_code", country_code.as_str());
                 }
@@ -241,7 +241,7 @@ impl Metrics {
 
             if let Some(device_state) = response.device_state {
                 if let Some(uptime_s) = device_state.uptime_s {
-                    log::info!("uptime_s: {}", &uptime_s);
+                    info!("uptime_s: {}", &uptime_s);
 
                     let previous_uptime_s = self.uptime_s.get();
                     if previous_uptime_s < uptime_s as f64 {
@@ -254,96 +254,96 @@ impl Metrics {
             }
 
             if let Some(state) = response.state {
-                log::info!("state: {}", &state);
+                info!("state: {}", &state);
 
                 self.state.set(state as f64);
             }
 
             if let Some(alerts) = response.alerts {
                 if let Some(motors_stuck) = alerts.motors_stuck {
-                    log::info!("alert_motors_stuck: {}", &motors_stuck);
+                    info!("alert_motors_stuck: {}", &motors_stuck);
 
                     self.alert_motors_stuck.set(bool_to_f64(motors_stuck));
                 }
                 if let Some(thermal_throttle) = alerts.thermal_throttle {
-                    log::info!("alert_thermal_throttle: {}", &thermal_throttle);
+                    info!("alert_thermal_throttle: {}", &thermal_throttle);
 
                     self.alert_thermal_throttle.set(bool_to_f64(thermal_throttle));
                 }
                 if let Some(thermal_shutdown) = alerts.thermal_shutdown {
-                    log::info!("alert_thermal_shutdown: {}", &thermal_shutdown);
+                    info!("alert_thermal_shutdown: {}", &thermal_shutdown);
 
                     self.alert_thermal_shutdown.set(bool_to_f64(thermal_shutdown));
                 }
                 if let Some(mast_not_near_vertical) = alerts.mast_not_near_vertical {
-                    log::info!("alert_mast_not_near_vertical: {}", &mast_not_near_vertical);
+                    info!("alert_mast_not_near_vertical: {}", &mast_not_near_vertical);
 
                     self.alert_mast_not_near_vertical
                         .set(bool_to_f64(mast_not_near_vertical));
                 }
                 if let Some(unexpected_location) = alerts.unexpected_location {
-                    log::info!("alert_unexpected_location: {}", &unexpected_location);
+                    info!("alert_unexpected_location: {}", &unexpected_location);
 
                     self.alert_unexpected_location.set(bool_to_f64(unexpected_location));
                 }
                 if let Some(slow_ethernet_speeds) = alerts.slow_ethernet_speeds {
-                    log::info!("alert_slow_ethernet_speeds: {}", &slow_ethernet_speeds);
+                    info!("alert_slow_ethernet_speeds: {}", &slow_ethernet_speeds);
 
                     self.alert_slow_ethernet_speeds.set(bool_to_f64(slow_ethernet_speeds));
                 }
             }
 
             if let Some(snr) = response.snr {
-                log::info!("snr: {}", &snr);
+                info!("snr: {}", &snr);
 
                 self.snr.set(snr as f64);
             }
 
             if let Some(seconds_to_first_nonempty_slot) = response.seconds_to_first_nonempty_slot {
-                log::info!("seconds_to_first_nonempty_slot: {}", &seconds_to_first_nonempty_slot);
+                info!("seconds_to_first_nonempty_slot: {}", &seconds_to_first_nonempty_slot);
 
                 self.seconds_to_first_nonempty_slot
                     .set(seconds_to_first_nonempty_slot as f64);
             }
 
             if let Some(pop_ping_drop_rate) = response.pop_ping_drop_rate {
-                log::info!("pop_ping_drop_rate: {}", &pop_ping_drop_rate);
+                info!("pop_ping_drop_rate: {}", &pop_ping_drop_rate);
 
                 self.pop_ping_drop_rate.set(pop_ping_drop_rate as f64);
             }
 
             if let Some(downlink_throughput_bps) = response.downlink_throughput_bps {
-                log::info!("downlink_throughput_bps: {}", &downlink_throughput_bps);
+                info!("downlink_throughput_bps: {}", &downlink_throughput_bps);
 
                 self.downlink_throughput_bps.set(downlink_throughput_bps as f64);
             }
 
             if let Some(uplink_throughput_bps) = response.uplink_throughput_bps {
-                log::info!("uplink_throughput_bps: {}", &uplink_throughput_bps);
+                info!("uplink_throughput_bps: {}", &uplink_throughput_bps);
 
                 self.uplink_throughput_bps.set(uplink_throughput_bps as f64);
             }
 
             if let Some(pop_ping_latency_ms) = response.pop_ping_latency_ms {
-                log::info!("pop_ping_latency_ms: {}", &pop_ping_latency_ms);
+                info!("pop_ping_latency_ms: {}", &pop_ping_latency_ms);
 
                 self.pop_ping_latency_ms.set(pop_ping_latency_ms as f64);
             }
 
             if let Some(obstruction_stats) = response.obstruction_stats {
                 if let Some(currently_obstructed) = obstruction_stats.currently_obstructed {
-                    log::info!("obstruction_currently_obstructed: {}", &currently_obstructed);
+                    info!("obstruction_currently_obstructed: {}", &currently_obstructed);
 
                     self.obstruction_currently_obstructed
                         .set(bool_to_f64(currently_obstructed));
                 }
                 if let Some(fraction_obstructed) = obstruction_stats.fraction_obstructed {
-                    log::info!("obstruction_fraction_obstructed: {}", &fraction_obstructed);
+                    info!("obstruction_fraction_obstructed: {}", &fraction_obstructed);
 
                     self.obstruction_fraction_obstructed.set(fraction_obstructed as f64);
                 }
                 if let Some(last_24h_obstructed_s) = obstruction_stats.last_24h_obstructed_s {
-                    log::info!("obstruction_last_24h_obstructed_s: {}", &last_24h_obstructed_s);
+                    info!("obstruction_last_24h_obstructed_s: {}", &last_24h_obstructed_s);
 
                     let previous_obstruction_last_24h_obstructed_s = self.obstruction_last_24h_obstructed_s.get();
                     if previous_obstruction_last_24h_obstructed_s < last_24h_obstructed_s as f64 {
@@ -356,7 +356,7 @@ impl Metrics {
                     }
                 }
                 if let Some(valid_s) = obstruction_stats.valid_s {
-                    log::info!("obstruction_valid_s: {}", &valid_s);
+                    info!("obstruction_valid_s: {}", &valid_s);
 
                     let previous_obstruction_valid_s = self.obstruction_valid_s.get();
                     if previous_obstruction_valid_s < valid_s as f64 {
@@ -369,7 +369,7 @@ impl Metrics {
                 }
 
                 for (i, v) in obstruction_stats.wedge_fraction_obstructed.into_iter().enumerate() {
-                    log::info!("obstruction_wedge_fraction_obstructed: wedge {}: {}", &i, &v);
+                    info!("obstruction_wedge_fraction_obstructed: wedge {}: {}", &i, &v);
 
                     let mut m = HashMap::new();
                     let i = format!("{}", i);
@@ -380,7 +380,7 @@ impl Metrics {
                         .set(v as f64);
                 }
                 for (i, v) in obstruction_stats.wedge_abs_fraction_obstructed.into_iter().enumerate() {
-                    log::info!("obstruction_wedge_abs_fraction_obstructed: wedge {}: {}", &i, &v);
+                    info!("obstruction_wedge_abs_fraction_obstructed: wedge {}: {}", &i, &v);
 
                     let mut m = HashMap::new();
                     let i = format!("{}", i);
@@ -393,8 +393,8 @@ impl Metrics {
             }
         }
 
-        log::info!("updated metrics from Starlink device");
-        log::debug!("{:#?}", &self);
+        info!("updated metrics from Starlink device");
+        debug!("{:#?}", &self);
 
         Ok(())
     }

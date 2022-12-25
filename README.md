@@ -55,15 +55,8 @@ Configuration happens via the following env vars:
 
 ### Docker
 
-    # build yourself
-    docker build -t ewilken/starlink-exporter .
-    docker run --net=host ewilken/starlink-exporter
-
-    # or pull from GHCR
-    docker run --net=host ghcr.io/ewilken/starlink-exporter:latest
-
-    # or cross compile with Docker Buildx
-    docker buildx build --platform=linux/amd64,linux/arm64 -t ewilken/starlink-exporter .
+    docker build -t ghcr.io/ewilken/starlink-exporter .
+    docker run --net=host ghcr.io/ewilken/starlink-exporter
 
 ### Kubernetes
 

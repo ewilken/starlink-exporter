@@ -39,16 +39,7 @@ jobs:
           - nightly
         os:
           - ubuntu-latest
-          - windows-latest
           - macOS-latest
-        include:
-          - rust: stable
-            features: ''
-          - rust: beta
-            features: ''
-          - rust: nightly
-            features: ''
-            benches: true
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -60,24 +51,16 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
           components: rustfmt
-      - name: Build only
-        if: matrix.build-only
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: ${{ matrix.features }}
-      - name: Test
-        if: matrix.build-only != true
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: ${{ matrix.features }}
-      - name: Test all benches
-        if: matrix.benches && matrix.build-only != true
+      - name: Install protoc
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt update && sudo apt install -y protobuf-compiler libprotobuf-dev
+      - name: Install protoc
+        if: matrix.os == 'macOS-latest'
+        run: brew install protobuf
+      - name: cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --benches ${{ matrix.features }}
 
   doc:
     name: Build docs
@@ -91,14 +74,16 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - name: cargo rustdoc
+      - name: Install protoc
+        run: sudo apt update && sudo apt install -y protobuf-compiler libprotobuf-dev
+      - name: cargo rustdoc -- -D rustdoc::broken_intra_doc_links
         uses: actions-rs/cargo@v1
         with:
           command: rustdoc
-          args: -- -D intra-doc-link-resolution-failure
+          args: -- -D rustdoc::broken_intra_doc_links
 
-  github_container_registry_deployment:
-    name: GitHub Container Registry deployment
+  docker_image:
+    name: Docker image
     if: github.ref == 'refs/heads/main'
     needs: [style, doc, test]
     runs-on: ubuntu-latest
@@ -117,7 +102,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT }}
+          password: ${{ github.token }}
       - name: Build & push
         uses: docker/build-push-action@v2
         with:
