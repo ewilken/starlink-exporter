@@ -28,7 +28,7 @@ async fn main() -> Result<(), Error> {
         .unwrap_or("0.0.0.0:9184".to_string())
         .parse::<SocketAddr>()
         .expect("parsing BIND_ADDRESS");
-    let starlink_address = dotenv::var("STARLINK_ADDRESS").unwrap_or("http://192.168.100.1:9200".to_string());
+    let starlink_address = dotenv::var("STARLINK_ADDRESS").unwrap_or("http://dishy.starlink.com:9200".to_string());
 
     info!("connecting ro Starlink device on {}", &starlink_address);
 

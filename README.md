@@ -47,7 +47,7 @@ Currently, the following metrics are exposed:
 Configuration happens via the following env vars:
 
 - `BIND_ADDRESS`: Host and port to bind the HTTP server to. Defaults to `0.0.0.0:9184`.
-- `STARLINK_ADDRESS`: Protocol, host and port of the Starlink dish. Defaults to `http://192.168.100.1:9200`.
+- `STARLINK_ADDRESS`: Protocol, host and port of the Starlink dish. Defaults to `http://dishy.starlink.com:9200`.
 
 ### Local
 
