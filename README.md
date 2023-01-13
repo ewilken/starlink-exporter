@@ -56,7 +56,7 @@ Configuration happens via the following env vars:
 ### Docker
 
     docker build -t ghcr.io/ewilken/starlink-exporter .
-    docker run --net=host ghcr.io/ewilken/starlink-exporter
+    docker run ghcr.io/ewilken/starlink-exporter
 
 ### Kubernetes
 
@@ -102,8 +102,7 @@ spec:
             - name: BIND_ADDRESS
               value: '0.0.0.0:9184'
             - name: STARLINK_ADDRESS
-              value: 'http://192.168.100.1:9200'
-      hostNetwork: true
+              value: 'http://dishy.starlink.com:9200'
       dnsPolicy: ClusterFirstWithHostNet
 ```
 
